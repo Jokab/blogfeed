@@ -2,11 +2,25 @@ const express = require('express')
 const path = require('path');
 const app = express()
 
+const Parser = require('rss-parser');
+const parser = new Parser();
+
 const elleBlogs = [
-  {name: "Sandra", url: "https://sandrabeijer.elle.se"},
-  {name: "Flora", url: "https://flora.elle.se"},
-  {name: "Elsa", url: "https://elsa.elle.se"}
+  {name: "Sandra Beijer", url: "https://sandrabeijer.elle.se"},
+  {name: "Flora Wiström", url: "https://flora.elle.se"},
+  {name: "Elsa Billgren", url: "https://elsa.elle.se"}
 ]
+
+const bffEllen = {
+  name: "Ellen Strömberg",
+  url: "https://www.bffellen.com/blog-1?format=json"
+}
+
+const juliaEriksson = {
+  name: "Julia Eriksson",
+  url: "https://juliaeriksson.se/"
+}
+
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -14,20 +28,97 @@ app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-app.post('/blogs', async (req, res) => {
-  try {
-    const response = await Promise.all(elleBlogs.map(async blog => {
-      const res = await fetch(blog.url+"/api/post");
+const pagesToGet = 3;
+
+async function getEllen() {
+  const res = await fetch("https://www.bffellen.com/blog-1?format=json");
+  const items = (await res.json()).items;
+  const sorted = items.sort((a, b) => b !== undefined ? new Date(b.addedOn) - new Date(a.addedOn) : a);
+  return sorted.slice(0,3).map(blogPost => {
+    return {
+      name: bffEllen.name, 
+      lastUpdateDate: new Date(blogPost.addedOn), 
+      url: new URL(blogPost.fullUrl, "https://www.bffellen.com/"), 
+      title: blogPost.title,
+      id: blogPost.id
+    };
+  });
+}
+
+async function getJulia() {
+  const res = await fetch(new URL("/wp-json/wp/v2/posts", juliaEriksson.url));
+  const items = (await res.json());
+  const sorted = items.sort((a, b) => b !== undefined ? new Date(b.date) - new Date(a.date) : a);
+  return sorted.slice(0,3).map(blogPost => {
+    return {
+      name: juliaEriksson.name, 
+      lastUpdateDate: new Date(blogPost.date), 
+      url: blogPost.link, 
+      title: blogPost.title.rendered,
+      id: blogPost.id
+    };
+  });
+}
+
+async function getSardellen() {
+  const res = await parser.parseURL("https://sardellen.wordpress.com/feed");
+  const sorted = res.items.sort((a, b) => b !== undefined ? new Date(b.pubDate) - new Date(a.pubDate) : a);
+  return sorted.slice(0,3).map(blogPost => {
+    return {
+      name: "Sardellen", 
+      lastUpdateDate: new Date(blogPost.pubDate), 
+      url: blogPost.link, 
+      title: blogPost.title,
+      id: blogPost.title.replaceAll(" ", "-")
+    };
+  });
+}
+
+async function getSar_As() {
+  const res = await parser.parseURL("https://sar.as/feed");
+  const sorted = res.items.sort((a, b) => b !== undefined ? new Date(b.pubDate) - new Date(a.pubDate) : a);
+  return sorted.slice(0,3).map(blogPost => {
+    return {
+      name: "Sar.as", 
+      lastUpdateDate: new Date(blogPost.pubDate), 
+      url: blogPost.link, 
+      title: blogPost.title,
+      id: blogPost.title.replaceAll(" ", "-")
+    };
+  });
+}
+
+
+function getElle() {
+  return elleBlogs.flatMap(async (blog) => {
+    const blogs = []
+    for (let i = 1; i <= pagesToGet; i++) {
+      const res = await fetch(blog.url+"/api/post?page="+i);
       const blogPost = (await res.json()).data[0];
       const date = blogPost.date;
-      return {
+      
+      blogs.push({
         name: blog.name, 
         lastUpdateDate: date, 
         url: new URL(blogPost.url, blog.url), 
         title: blogPost.title,
         id: blogPost.id
-      };
-    }));
+      });
+    }
+    return blogs;
+  })
+}
+
+app.post('/blogs', async (req, res) => {
+  try {
+    const requests = [
+      ...getElle(), 
+      getEllen(),
+      getJulia(),
+      getSardellen(),
+      getSar_As()
+    ];
+    const response = await Promise.all(requests);
 
     res.set('Access-Control-Allow-Origin', 'localhost')
     return res.send(response)
