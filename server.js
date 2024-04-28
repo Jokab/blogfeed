@@ -5,7 +5,8 @@ const port = 3000
 
 const elleBlogs = [
   {name: "Flora", url: "https://flora.elle.se"},
-  {name: "Elsa", url: "https://elsa.elle.se"}
+  {name: "Elsa", url: "https://elsa.elle.se"},
+  {name: "Sandra", url: "https://sandrabeijer.elle.se"}
 ]
 
 app.post('/blogs', async (req, res) => {

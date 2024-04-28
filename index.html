@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Linneas bloggflöde</title>
     <style>
         body {
-            font-size: 16px;
+            font-size: 18px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
             padding: 0;
             margin: 0;
         }
@@ -12,8 +14,8 @@
             padding: 0;
         }
         a {
+            text-decoration: none;
             color: white;
-            text-decoration: none;;
         }
         .main {
             position: fixed;
@@ -27,63 +29,70 @@
                 rgba(0, 0, 0, 0.7),
                 rgba(0, 0, 0, 0.7)
                 ),
-                url("https://www.publicdomainpictures.net/pictures/40000/velka/golden-retriever-dog-1364426710r9x.jpg");
+                url("public/golden-retriever-dog-1364426710r9x.jpg");
             background-size: 25% 20%; 
             background-repeat: repeat;
             width: 100%;
             height: 100%;
         }
+        .header {
+            color: #9B2242;
+        }
         .content {
-            text-shadow: white 0px 0px 4px;
-
             color: white;
             padding: 1rem;
-
         }
     </style>
-    <title>Linneas bloggflöde</title>
     <script type="text/javascript">
-
         async function post() {
             const blogs = await fetch("http://localhost:3000/blogs", {
                 headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Headers": "*",
+                    "Access-Control-Allow-Methods": "POST",
                 },
                 method: "POST",
-                mode: "cors", // no-cors, *cors, same-origin
-                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: "same-origin", // include, *same-origin, omit
-                redirect: "follow", // manual, *follow, error
+                mode: "cors",
+                cache: "no-cache",
+                credentials: "same-origin",
+                redirect: "follow",
                 referrerPolicy: "no-referrer",
             });
             return blogs.json();
         }
         
-        post().then((res) => {
-            res.forEach(blog => {
-                const header = document.createElement("h2");
-                header.textContent = blog.name;
-                const link = document.createElement("a");
-                link.href = blog.url;
-                const blogList = document.createElement("ul");
-                const listItem = document.createElement("li");
-                link.textContent = `${new Date(blog.lastUpdateDate).toLocaleDateString("sv-SE")}: ${blog.title}`;
-                listItem.appendChild(link);
-                blogList.appendChild(listItem);
-                document.body.getElementsByClassName("content")[0].appendChild(header);
-                document.body.getElementsByClassName("content")[0].appendChild(blogList);
+        post()
+            .then((res) => {
+                document.getElementById("loading").remove();
+                res.forEach(blog => {
+                    const header = document.createElement("h2");
+                    header.textContent = blog.name;
+                    const link = document.createElement("a");
+                    link.href = blog.url;
+                    link.target = "_blank";
+                    const blogList = document.createElement("ul");
+                    const listItem = document.createElement("li");
+                    const date = new Date(blog.lastUpdateDate);
+                    link.textContent = `${date.getDate()}/${date.getMonth()}: ${blog.title}`;
+                    listItem.appendChild(link);
+                    blogList.appendChild(listItem);
+                    document.body.getElementsByClassName("content")[0].appendChild(header);
+                    document.body.getElementsByClassName("content")[0].appendChild(blogList);
+                });
+            })
+            .catch(() =>  {
+                document.getElementById("loading").remove();
+                const errorMsg = document.createElement("h2").textContent = "Något gick fel";
+                document.body.getElementsByClassName("content")[0].appendChild(errorMsg);
             });
-        }
-        );
     </script>
 </head>
 <body>
     <div class="main">
         <div class="background">
             <div class="content">
-                <h1>Linneas bloggflöde</h1>
+                <h1 class="header">LINNEAS BLOGGFLÖDE</h1>
+                <div id="loading">Laddar...</div>
             </div>
         </div>
     </div>
