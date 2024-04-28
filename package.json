@@ -4,6 +4,12 @@
   "dependencies": {
     "express": "^4.19.2",
     "jsdom": "^24.0.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "vercel": "^34.1.3"
+  },
+  "scripts": {
+    "build": "echo 'No build step'",
+    "start": "node api/index.js --port $PORT",
+    "dev": "nodemon api/index.js --port $PORT"
   }
 }

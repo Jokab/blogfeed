@@ -1,13 +1,18 @@
 const express = require('express')
-const jsdom = require("jsdom");
+const path = require('path');
 const app = express()
-const port = 3000
 
 const elleBlogs = [
+  {name: "Sandra", url: "https://sandrabeijer.elle.se"},
   {name: "Flora", url: "https://flora.elle.se"},
-  {name: "Elsa", url: "https://elsa.elle.se"},
-  {name: "Sandra", url: "https://sandrabeijer.elle.se"}
+  {name: "Elsa", url: "https://elsa.elle.se"}
 ]
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.get('/', function (req, res) {
+	res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
 
 app.post('/blogs', async (req, res) => {
   try {
@@ -19,7 +24,8 @@ app.post('/blogs', async (req, res) => {
         name: blog.name, 
         lastUpdateDate: date, 
         url: new URL(blogPost.url, blog.url), 
-        title: blogPost.title
+        title: blogPost.title,
+        id: blogPost.id
       };
     }));
 
@@ -31,6 +37,7 @@ app.post('/blogs', async (req, res) => {
   }
 })
 
-app.listen(port, () => {
-  console.log(`Blogs app listening on port ${port}`)
-})
+app.listen(process.env.PORT, () => {
+  console.log(`Running on port ${process.env.PORT}.`);
+});
+module.exports = app
