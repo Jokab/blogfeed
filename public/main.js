@@ -57,7 +57,13 @@ post()
                 
                 const time = document.createElement("div");
                 time.setAttribute("data-id", "time");
-                time.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
+                const dateIsLastYear = date.getFullYear() < new Date().getFullYear();
+                time.textContent = date.toLocaleString('sv-SE', 
+                    { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: dateIsLastYear ? "numeric" : undefined 
+                    }).replace(".", "");
 
                 const title = document.createElement("div");
                 title.setAttribute("data-id", "title");
