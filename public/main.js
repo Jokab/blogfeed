@@ -18,21 +18,21 @@ async function post() {
 post()
     .then((res) => {
         document.getElementById("loading").remove();
-        res.forEach(blogEntries => {
-            const header = document.createElement("h2");
-            header.textContent = blogEntries[0].name;
-            document.body.getElementsByClassName("content")[0].appendChild(header);
-            const blogList = document.createElement("ul");
-            blogEntries.forEach(blog => {
+        res.flatMap(x => x.map(y => y)).sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate)). //.forEach(blogEntries => {
+            // const header = document.createElement("h2");
+            // header.textContent = blogEntries[0].name;
+            // document.getElementById("content").appendChild(header);
+            // const blogList = document.createElement("ul");
+            forEach(blog => {
                 const link = document.createElement("a");
                 link.href = blog.url;
                 link.target = "_blank";
-                const listItem = document.createElement("li");
+                const listItem = document.createElement("p");
                 const date = new Date(blog.lastUpdateDate);
                 
                 const isRead = (localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true")
                     || blog.clicked === true;
-                link.textContent = `${isRead ? "✅" : ""} ${date.getDate()}/${date.getMonth() + 1} - ${blog.title}`
+                link.textContent = `${isRead ? "✅" : ""} ${date.getDate()}/${date.getMonth() + 1} ${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })} - ${blog.title} - ${blog.name}`
                 link.addEventListener("click", () => {
                     localStorage.setItem(blog.id, "true");
                     fetch("/clickBlog", {
@@ -43,15 +43,15 @@ post()
                     .catch(() => console.error("Failed to send click event"));
                 });
                 listItem.appendChild(link);
-                blogList.appendChild(listItem);
+                document.getElementById("content").appendChild(listItem);
             });
-            document.body.getElementsByClassName("content")[0].appendChild(blogList);
-        });
-    })
+            // document.getElementById("content").appendChild(blogList);
+        })
+    
     .catch((error) =>  {
         console.error(error);
         document.getElementById("loading").remove();
         const errorMsg = document.createElement("h2");
         errorMsg.textContent = "Något gick fel, försök igen senare.";
-        document.body.getElementsByClassName("content")[0].appendChild(errorMsg);
+        document.getElementById("content").appendChild(errorMsg);
     });
