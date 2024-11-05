@@ -32,7 +32,7 @@ post()
                 const time = document.createElement("div");
                 const datePart = document.createElement("div")
                 const timePart = document.createElement("div")
-                time.className = "time";
+                time.classList.add("time");
                 datePart.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
                 timePart.textContent = `${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
                 time.appendChild(datePart)
@@ -55,6 +55,13 @@ post()
                     .then(() => console.log("Successfully sent click event"))
                     .catch(() => console.error("Failed to send click event"));
                 });
+                
+                if (isRead) {
+                    isReadEle.classList.add("read")
+                    time.classList.add("read")
+                    title.classList.add("read")
+                    blogName.classList.add("read")
+                }
                 document.getElementById("content").appendChild(isReadEle);
                 document.getElementById("content").appendChild(time);
                 document.getElementById("content").appendChild(title);

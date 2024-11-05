@@ -48,3 +48,6 @@ main {
     justify-content: space-between;
     text-align: left;
 }
+.read {
+    opacity:0.3;
+}
