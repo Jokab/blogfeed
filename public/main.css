@@ -69,8 +69,8 @@ main {
     text-align: left;
     gap: 6px;
 }
-.read {
-    opacity:0.2;
+.read div {
+    opacity:0.3;
 }
 .row:hover {
     transform: scale(1.02);

@@ -15,9 +15,16 @@ async function post() {
     return blogs.json();
 }
 
+function setRowRead(row) {
+    row.classList.add("read")
+    const isReadEle = row.querySelector('[data-id="isRead"]');
+    isReadEle.textContent = "✅"
+}
+
 post()
     .then((res) => {
         document.getElementById("loading").remove();
+        const contentElement = document.getElementById("content");
         res
             .flatMap(x => x.map(y => y))
             .sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate))
@@ -26,52 +33,50 @@ post()
                 row.href = blog.url;
                 row.target = "_blank";
                 row.classList.add("row")
-                
-                const date = new Date(blog.lastUpdateDate);
-
-                const isRead = (localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true")
-                || blog.clicked === true;
-                const isReadEle = document.createElement("div");
-                isReadEle.textContent = isRead ? "✅" : "";
-                
-                const time = document.createElement("div");
-                const datePart = document.createElement("div")
-                const timePart = document.createElement("div")
-                time.classList.add("time");
-                datePart.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
-                timePart.textContent = `${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
-                time.appendChild(datePart)
-                // time.appendChild(timePart)
-
-                const title = document.createElement("div");
-                title.textContent = blog.title;
-
-                const blogName = document.createElement("div");
-                blogName.textContent = `${blog.name}`
-
-                title.addEventListener("click", () => {
-                    localStorage.setItem(blog.id, "true");
+                row.setAttribute("data-id", "row")
+                row.addEventListener("click", (e) => {
                     fetch("/clickBlog", {
                         method: "POST", 
                         body: JSON.stringify({ blogId: blog.id }), 
                         headers: { "Content-Type": "application/json" }})
-                    .then(() => console.log("Successfully sent click event"))
+                    .then(() => {
+                        const dataId = e.target.getAttribute("data-id")
+                        const row = dataId === "row" 
+                            ? e.target
+                            : e.target.closest('[data-id="row"]');
+                        setRowRead(row);
+                    })
                     .catch(() => console.error("Failed to send click event"));
                 });
                 
-                if (isRead) {
-                    isReadEle.classList.add("read")
-                    time.classList.add("read")
-                    title.classList.add("read")
-                    blogName.classList.add("read")
-                }
+                const date = new Date(blog.lastUpdateDate);
+
+                const isRead = blog.clicked === true;
+                const isReadEle = document.createElement("div");
+                isReadEle.setAttribute("data-id", "isRead");
+                
+                const time = document.createElement("div");
+                time.setAttribute("data-id", "time");
+                time.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
+
+                const title = document.createElement("div");
+                title.setAttribute("data-id", "title");
+                title.textContent = blog.title;
+
+                const blogName = document.createElement("div");
+                blogName.setAttribute("data-id", "blogName");
+                blogName.textContent = `${blog.name}`
+
                 row.appendChild(isReadEle);
                 row.appendChild(time);
                 row.appendChild(title);
                 row.appendChild(blogName);
-                document.getElementById("content").appendChild(row);
+
+                if (isRead) {
+                    setRowRead(row);
+                }
+                contentElement.appendChild(row);
             });
-            // document.getElementById("content").appendChild(blogList);
         })
     
     .catch((error) =>  {
