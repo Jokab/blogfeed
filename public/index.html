@@ -77,10 +77,17 @@
                         const listItem = document.createElement("li");
                         const date = new Date(blog.lastUpdateDate);
                         
-                        const isRead = localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true";
-                        link.textContent = `${isRead ? "✔️" : ""} ${date.getDate()}/${date.getMonth() + 1} - ${blog.title}`
+                        const isRead = (localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true")
+                            || blog.clicked === true;
+                        link.textContent = `${isRead ? "✅" : ""} ${date.getDate()}/${date.getMonth() + 1} - ${blog.title}`
                         link.addEventListener("click", () => {
                             localStorage.setItem(blog.id, "true");
+                            fetch("/clickBlog", {
+                                method: "POST", 
+                                body: JSON.stringify({ blogId: blog.id }), 
+                                headers: { "Content-Type": "application/json" }})
+                            .then(() => console.log("Successfully sent click event"))
+                            .catch(() => console.error("Failed to send click event"));
                         });
                         listItem.appendChild(link);
                         blogList.appendChild(listItem);

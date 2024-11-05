@@ -4,6 +4,7 @@ const app = express()
 
 const Parser = require('rss-parser');
 const parser = new Parser();
+const kv = require('@vercel/kv');
 
 const elleBlogs = [
   {name: "Sandra Beijer", url: "https://sandrabeijer.elle.se"},
@@ -21,7 +22,7 @@ const juliaEriksson = {
   url: "https://juliaeriksson.se/"
 }
 
-
+app.use(express.json())
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('/', function (req, res) {
@@ -109,19 +110,53 @@ function getElle() {
   })
 }
 
-app.post('/blogs', async (req, res) => {
-  try {
-    const requests = [
-      ...getElle(), 
-      getEllen(),
-      getJulia(),
-      getSardellen(),
-      getSar_As()
-    ];
-    const response = await Promise.all(requests);
+async function getBlogData() {
+  const requests = [
+    ...getElle(), 
+    getEllen(),
+    getJulia(),
+    getSardellen(),
+    getSar_As()
+  ];
+  return Promise.all(requests);
+}
 
-    res.set('Access-Control-Allow-Origin', 'localhost')
-    return res.send(response)
+async function setClickedIfCached(blogData, clickedBlogs) {
+  if (clickedBlogs && clickedBlogs.length > 0) {
+    blogData.forEach(blog => {
+      blog.forEach(blogPost => {
+        blogPost.clicked = clickedBlogs.some(x => x === blogPost.id);
+      });
+    });
+  }
+}
+
+async function getClickedBlogIds(blogIds) {
+  const cachedData = await kv.kv.smismember("clicked", blogIds);
+  const result = blogIds.filter((_, i) => cachedData[i] === 1);
+  return result;
+}
+ 
+app.post('/clickBlog', async (req, res) => {
+  try {
+    const result = await kv.kv.sadd("clicked", req.body.blogId);
+    console.log(result);
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    return res.send('Kunde inte spara bloggklick')
+  }
+})
+
+app.post('/blogs', async (_, res) => {
+  try {
+    const blogData = await getBlogData();
+
+    const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
+    const clickedBlogIds = await getClickedBlogIds(allBlogIds);
+    await setClickedIfCached(blogData, clickedBlogIds);
+
+    return res.send(blogData)
   } catch (error) {
     console.error(error);
     return res.send('Nåt gick fel :(')

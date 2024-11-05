@@ -1,7 +1,7 @@
 {
   "name": "blogfeed",
-  "packageManager": "yarn@4.1.0",
   "dependencies": {
+    "@vercel/kv": "^1.0.1",
     "express": "^4.19.2",
     "jsdom": "^24.0.0",
     "nodemon": "^3.1.0",
