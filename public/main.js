@@ -22,7 +22,9 @@ post()
             .flatMap(x => x.map(y => y))
             .sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate))
             .forEach(blog => {
-                const row = document.createElement("div");
+                const row = document.createElement("a");
+                row.href = blog.url;
+                row.target = "_blank";
                 row.classList.add("row")
                 
                 const date = new Date(blog.lastUpdateDate);
@@ -41,11 +43,8 @@ post()
                 time.appendChild(datePart)
                 // time.appendChild(timePart)
 
-                const title = document.createElement("a");
-                title.href = blog.url;
-                title.target = "_blank";
+                const title = document.createElement("div");
                 title.textContent = blog.title;
-                title.classList.add("title")
 
                 const blogName = document.createElement("div");
                 blogName.textContent = `${blog.name}`
