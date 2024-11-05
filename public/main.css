@@ -52,9 +52,9 @@ main {
     grid-template-columns: 0.5fr 1fr 6fr 3fr;
     gap: 16px;
 
-    background-color: rgba(155, 34, 66, 0.9); /* Burgundy with transparency */
-    color: white; /* Ensures the text stands out */
-    border: 1px solid #D4A017; /* Muted mustard border */
+    background-color: rgba(155, 34, 66, 0.9); 
+    color: white;
+    border: 1px solid #D4A017;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     padding: 20px;
@@ -62,12 +62,6 @@ main {
     -webkit-transition: all 100ms ease-in-out;
     transition: all 100ms ease-in-out;
     color: white;
-}
-.time {
-    display: flex;
-    justify-content: space-between;
-    text-align: left;
-    gap: 6px;
 }
 .read div {
     opacity:0.3;
