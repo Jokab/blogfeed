@@ -18,22 +18,35 @@ async function post() {
 post()
     .then((res) => {
         document.getElementById("loading").remove();
-        res.flatMap(x => x.map(y => y)).sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate)). //.forEach(blogEntries => {
-            // const header = document.createElement("h2");
-            // header.textContent = blogEntries[0].name;
-            // document.getElementById("content").appendChild(header);
-            // const blogList = document.createElement("ul");
-            forEach(blog => {
-                const link = document.createElement("a");
-                link.href = blog.url;
-                link.target = "_blank";
-                const listItem = document.createElement("p");
+        res
+            .flatMap(x => x.map(y => y))
+            .sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate))
+            .forEach(blog => {
                 const date = new Date(blog.lastUpdateDate);
-                
+
                 const isRead = (localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true")
-                    || blog.clicked === true;
-                link.textContent = `${isRead ? "✅" : ""} ${date.getDate()}/${date.getMonth() + 1} ${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })} - ${blog.title} - ${blog.name}`
-                link.addEventListener("click", () => {
+                || blog.clicked === true;
+                const isReadEle = document.createElement("div");
+                isReadEle.textContent = isRead ? "✅" : "";
+                
+                const time = document.createElement("div");
+                const datePart = document.createElement("div")
+                const timePart = document.createElement("div")
+                time.className = "time";
+                datePart.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
+                timePart.textContent = `${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
+                time.appendChild(datePart)
+                time.appendChild(timePart)
+
+                const title = document.createElement("a");
+                title.href = blog.url;
+                title.target = "_blank";
+                title.textContent = blog.title;
+
+                const blogName = document.createElement("div");
+                blogName.textContent = `${blog.name}`
+
+                title.addEventListener("click", () => {
                     localStorage.setItem(blog.id, "true");
                     fetch("/clickBlog", {
                         method: "POST", 
@@ -42,8 +55,10 @@ post()
                     .then(() => console.log("Successfully sent click event"))
                     .catch(() => console.error("Failed to send click event"));
                 });
-                listItem.appendChild(link);
-                document.getElementById("content").appendChild(listItem);
+                document.getElementById("content").appendChild(isReadEle);
+                document.getElementById("content").appendChild(time);
+                document.getElementById("content").appendChild(title);
+                document.getElementById("content").appendChild(blogName);
             });
             // document.getElementById("content").appendChild(blogList);
         })
