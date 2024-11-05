@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path');
 const app = express()
+require('dotenv').config();
 
 const Parser = require('rss-parser');
 const parser = new Parser();
@@ -139,8 +140,7 @@ async function getClickedBlogIds(blogIds) {
  
 app.post('/clickBlog', async (req, res) => {
   try {
-    const result = await kv.kv.sadd("clicked", req.body.blogId);
-    console.log(result);
+    //const result = await kv.kv.sadd("clicked", req.body.blogId);
     return res.sendStatus(200);
   } catch (error) {
     console.error(error);
@@ -152,9 +152,9 @@ app.post('/blogs', async (_, res) => {
   try {
     const blogData = await getBlogData();
 
-    const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
-    const clickedBlogIds = await getClickedBlogIds(allBlogIds);
-    await setClickedIfCached(blogData, clickedBlogIds);
+    //const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
+    //const clickedBlogIds = await getClickedBlogIds(allBlogIds);
+    //await setClickedIfCached(blogData, clickedBlogIds);
 
     return res.send(blogData)
   } catch (error) {
