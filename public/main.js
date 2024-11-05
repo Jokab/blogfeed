@@ -22,6 +22,9 @@ post()
             .flatMap(x => x.map(y => y))
             .sort((a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate))
             .forEach(blog => {
+                const row = document.createElement("div");
+                row.classList.add("row")
+                
                 const date = new Date(blog.lastUpdateDate);
 
                 const isRead = (localStorage.getItem(blog.id) !== undefined && localStorage.getItem(blog.id) === "true")
@@ -36,12 +39,13 @@ post()
                 datePart.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
                 timePart.textContent = `${date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
                 time.appendChild(datePart)
-                time.appendChild(timePart)
+                // time.appendChild(timePart)
 
                 const title = document.createElement("a");
                 title.href = blog.url;
                 title.target = "_blank";
                 title.textContent = blog.title;
+                title.classList.add("title")
 
                 const blogName = document.createElement("div");
                 blogName.textContent = `${blog.name}`
@@ -62,10 +66,11 @@ post()
                     title.classList.add("read")
                     blogName.classList.add("read")
                 }
-                document.getElementById("content").appendChild(isReadEle);
-                document.getElementById("content").appendChild(time);
-                document.getElementById("content").appendChild(title);
-                document.getElementById("content").appendChild(blogName);
+                row.appendChild(isReadEle);
+                row.appendChild(time);
+                row.appendChild(title);
+                row.appendChild(blogName);
+                document.getElementById("content").appendChild(row);
             });
             // document.getElementById("content").appendChild(blogList);
         })
