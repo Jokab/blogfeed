@@ -99,26 +99,6 @@ function createBlogRow(blog) {
     return row;
 }
 
-
-function listChronologically(blogData) {
-    const contentElement = document.getElementById("content");
-    const byDateDescending = (a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate);
-
-    const rows = blogData.flatMap(x => x.map(y => y))
-        .sort(byDateDescending)
-        .map(blog => 
-            pipe(
-                createBlogRow(blog),
-                r => addIsRead(r, blog),
-                r => addTime(r, blog),
-                r => addTitle(r, blog),
-                r => addBlogName(r, blog)
-            )
-        );
-    
-    rows.forEach(row => contentElement.appendChild(row));
-}
-
 function createBloggerSection(dataForBlogger) {
     const bloggerSection = document.createElement("div");
     const heading = document.createElement("h1");
@@ -143,23 +123,45 @@ function createBloggerSection(dataForBlogger) {
     return bloggerSection;
 }
 
-function groupByBlogger(blogData) {
-    const contentElement = document.getElementById("content");
-    const byDateDescending = (a,b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate);
+const blogByDateDescending = (a,b) => 
+    new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate);
 
-    const sections = blogData.map(createBloggerSection)
-    
-    sections.forEach(blogger => contentElement.appendChild(blogger));
+function listChronologically(blogData) {
+
+    return blogData
+        .flatMap(x => x.map(y => y))
+        .sort(blogByDateDescending)
+        .map(blog => 
+            pipe(
+                createBlogRow(blog),
+                r => addIsRead(r, blog),
+                r => addTime(r, blog),
+                r => addTitle(r, blog),
+                r => addBlogName(r, blog)
+            )
+        );
+}
+
+function groupByBlogger(blogData) {
+    const bloggersByDateDescending = (blogger1,blogger2) => 
+        blogByDateDescending(
+            blogger1.sort(blogByDateDescending)[0], 
+            blogger2.sort(blogByDateDescending)[0]
+        );
+
+    return blogData
+        .sort(bloggersByDateDescending)
+        .map(createBloggerSection)
 }
 
 function listBlogs(blogData) {
     const contentElement = document.getElementById("content");
     contentElement.replaceChildren();
-    if (isChronologicalGrid) {
-        groupByBlogger(blogData);
-    } else {
-        listChronologically(blogData);
-    }
+
+    (isChronologicalGrid
+        ? groupByBlogger(blogData)
+        : listChronologically(blogData))
+        .forEach(row => contentElement.appendChild(row));
 }
 
 let isChronologicalGrid = false;
