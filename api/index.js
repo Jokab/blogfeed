@@ -140,7 +140,7 @@ async function getClickedBlogIds(blogIds) {
  
 app.post('/clickBlog', async (req, res) => {
   try {
-    //const result = await kv.kv.sadd("clicked", req.body.blogId);
+    const result = await kv.kv.sadd("clicked", req.body.blogId);
     return res.sendStatus(200);
   } catch (error) {
     console.error(error);
