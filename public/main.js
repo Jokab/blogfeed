@@ -126,10 +126,8 @@ function createBloggerSection(dataForBlogger) {
 const blogByDateDescending = (a,b) => 
     new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate);
 
-function listChronologically(blogData) {
-
-    return blogData
-        .flatMap(x => x.map(y => y))
+const listChronologically = (blogData) =>
+    blogData
         .sort(blogByDateDescending)
         .map(blog => 
             pipe(
@@ -140,16 +138,15 @@ function listChronologically(blogData) {
                 r => addBlogName(r, blog)
             )
         );
-}
 
 function groupByBlogger(blogData) {
-    const bloggersByDateDescending = (blogger1,blogger2) => 
+    const bloggersByDateDescending = (blogger1, blogger2) => 
         blogByDateDescending(
             blogger1.sort(blogByDateDescending)[0], 
             blogger2.sort(blogByDateDescending)[0]
         );
 
-    return blogData
+    return Object.values(Object.groupBy(blogData, ({name}) => name))
         .sort(bloggersByDateDescending)
         .map(createBloggerSection)
 }

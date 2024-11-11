@@ -26,7 +26,7 @@ const juliaEriksson = {
 app.use(express.json())
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.get('/', function (req, res) {
+app.get('/', function (_, res) {
 	res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
@@ -118,19 +118,17 @@ async function getBlogData() {
     getJulia(),
     getSardellen(),
     getSar_As()
-  ];
-  return Promise.all(requests);
+  ]
+  return (await Promise.all(requests)).flatMap(x => x);
 }
 
 async function getClickedIfCached(blogData) {
-  const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
+  const allBlogIds = blogData.map(y => y.id);
   const clickedBlogIds = await getClickedBlogIds(allBlogIds);
 
   if (clickedBlogIds && clickedBlogIds.length > 0) {
-    return blogData.map(blog => 
-      blog.map(blogPost => 
-        ({...blogPost, clicked: clickedBlogIds.some(x => x === blogPost.id)})
-      )
+    return blogData.map(blogPost => 
+      ({...blogPost, clicked: clickedBlogIds.some(x => x === blogPost.id)})
     );
   }
   return blogData;
@@ -141,10 +139,18 @@ async function getClickedBlogIds(blogIds) {
   const result = blogIds.filter((_, i) => cachedData[i] === 1);
   return result;
 }
+
+const storeNewBlogsInCache = async (blogs) => 
+  await kv.kv.mset(blogs
+    .reduce((acc, item) => {
+      acc[`blog-${item.id}`] = item;
+      return acc;
+    }, {}
+  ));
  
 app.post('/clickBlog', async (req, res) => {
   try {
-    const result = await kv.kv.sadd("clicked", req.body.blogId);
+    const result = await kv.kv.sadd("clicked", req.body.blogId); 
     return res.sendStatus(200);
   } catch (error) {
     console.error(error);
@@ -152,10 +158,28 @@ app.post('/clickBlog', async (req, res) => {
   }
 })
 
+const getCachedValues = async () => {
+  const cachedKeys = await kv.kv.scan(0, {match: "blog-*", count: 30});
+  return  cachedKeys && cachedKeys[1].length > 0
+    ? await kv.kv.mget(cachedKeys[1])
+    : [];
+}
+
 app.post('/blogs', async (_, res) => {
   try {
-    const blogData = await getBlogData();
-    const updatedBlogData = await getClickedIfCached(blogData);
+    const cachedValues = await getCachedValues();
+    const fetchedBlogData = await getBlogData();
+    const blogsNotInCache = fetchedBlogData
+      .filter(x => !cachedValues
+        .map(y => y.id)
+        .includes(x.id)
+      );
+    if (blogsNotInCache && blogsNotInCache.length > 0) {
+      await storeNewBlogsInCache(blogsNotInCache);
+    }
+
+    const allBlogs = blogsNotInCache.concat(cachedValues);
+    const updatedBlogData = await getClickedIfCached(allBlogs);
 
     return res.send(updatedBlogData)
   } catch (error) {
