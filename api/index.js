@@ -122,17 +122,18 @@ async function getBlogData() {
   return Promise.all(requests);
 }
 
-async function setClickedIfCached(blogData, clickedBlogs) {
+async function getClickedIfCached(blogData) {
   const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
   const clickedBlogIds = await getClickedBlogIds(allBlogIds);
 
   if (clickedBlogIds && clickedBlogIds.length > 0) {
-    blogData.forEach(blog => {
-      blog.forEach(blogPost => {
-        blogPost.clicked = clickedBlogIds.some(x => x === blogPost.id);
-      });
-    });
+    return blogData.map(blog => 
+      blog.map(blogPost => 
+        ({...blogPost, clicked: clickedBlogIds.some(x => x === blogPost.id)})
+      )
+    );
   }
+  return blogData;
 }
 
 async function getClickedBlogIds(blogIds) {
@@ -154,9 +155,9 @@ app.post('/clickBlog', async (req, res) => {
 app.post('/blogs', async (_, res) => {
   try {
     const blogData = await getBlogData();
-    await setClickedIfCached(blogData);
+    const updatedBlogData = await getClickedIfCached(blogData);
 
-    return res.send(blogData)
+    return res.send(updatedBlogData)
   } catch (error) {
     console.error(error);
     return res.send('Nåt gick fel :(')
