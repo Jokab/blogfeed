@@ -69,3 +69,6 @@ main {
 .row:hover {
     transform: scale(1.02);
 }
+.bloggerHeading {
+    color: rgba(155, 34, 66, 0.9); 
+}
