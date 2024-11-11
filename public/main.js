@@ -154,7 +154,7 @@ function groupByBlogger(blogData) {
         .map(createBloggerSection)
 }
 
-function listBlogs(blogData) {
+function listBlogs(blogData, isChronologicalGrid) {
     const contentElement = document.getElementById("content");
     contentElement.replaceChildren();
 
@@ -169,7 +169,7 @@ let blogData = undefined;
 
 toggler.addEventListener("click", () => {
     isChronologicalGrid = !isChronologicalGrid;
-    listBlogs(blogData);
+    listBlogs(blogData, isChronologicalGrid);
 })
 
 post()
