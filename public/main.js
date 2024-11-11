@@ -177,7 +177,7 @@ post()
     const loadingEle = document.getElementById("loading");
     if (loadingEle) loadingEle.remove();
     blogData = res;
-    listBlogs(blogData)
+    listBlogs(blogData, isChronologicalGrid)
 })
 .catch((error) =>  {
     console.error(error);
