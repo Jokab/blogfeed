@@ -123,10 +123,13 @@ async function getBlogData() {
 }
 
 async function setClickedIfCached(blogData, clickedBlogs) {
-  if (clickedBlogs && clickedBlogs.length > 0) {
+  const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
+  const clickedBlogIds = await getClickedBlogIds(allBlogIds);
+
+  if (clickedBlogIds && clickedBlogIds.length > 0) {
     blogData.forEach(blog => {
       blog.forEach(blogPost => {
-        blogPost.clicked = clickedBlogs.some(x => x === blogPost.id);
+        blogPost.clicked = clickedBlogIds.some(x => x === blogPost.id);
       });
     });
   }
@@ -151,10 +154,7 @@ app.post('/clickBlog', async (req, res) => {
 app.post('/blogs', async (_, res) => {
   try {
     const blogData = await getBlogData();
-
-    const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
-    const clickedBlogIds = await getClickedBlogIds(allBlogIds);
-    await setClickedIfCached(blogData, clickedBlogIds);
+    await setClickedIfCached(blogData);
 
     return res.send(blogData)
   } catch (error) {
