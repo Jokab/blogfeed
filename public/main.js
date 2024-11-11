@@ -157,8 +157,8 @@ function listBlogs(blogData, isChronologicalGrid) {
 
     (isChronologicalGrid
         ? groupByBlogger(blogData)
-        : listChronologically(blogData))
-        .forEach(row => contentElement.appendChild(row));
+        : listChronologically(blogData)
+    ).forEach(row => contentElement.appendChild(row));
 }
 
 let isChronologicalGrid = false;
