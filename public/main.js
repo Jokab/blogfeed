@@ -21,13 +21,22 @@ function setRowRead(row) {
     isReadEle.textContent = "✅"
 }
 
-function createBlogRow(blog) {  
-    const date = new Date(blog.lastUpdateDate);
-
+function addIsRead(row, blog) {
     const isRead = blog.clicked === true;
     const isReadEle = document.createElement("div");
     isReadEle.setAttribute("data-id", "isRead");
-    
+
+    row.appendChild(isReadEle);
+    if (isRead) {
+        setRowRead(row);
+    }
+
+    return row;
+}
+
+function addTime(row, blog) {
+    const date = new Date(blog.lastUpdateDate);
+
     const time = document.createElement("div");
     time.setAttribute("data-id", "time");
     const dateIsLastYear = date.getFullYear() < new Date().getFullYear();
@@ -37,15 +46,36 @@ function createBlogRow(blog) {
             month: 'short', 
             year: dateIsLastYear ? "numeric" : undefined 
         }).replace(".", "");
+        row.appendChild(time);
 
+    return row;
+}
+
+function addTitle(row, blog) {
     const title = document.createElement("div");
     title.setAttribute("data-id", "title");
     title.textContent = blog.title;
+    row.appendChild(title);
 
+    return row;
+
+}
+
+function addBlogName(row, blog) {
     const blogName = document.createElement("div");
     blogName.setAttribute("data-id", "blogName");
     blogName.textContent = `${blog.name}`
+    row.appendChild(blogName);
 
+    return row;
+}
+
+
+function pipe(row, ...fns) {
+    return fns.reduce((acc, fn) => fn(acc), row);
+}
+
+function createBlogRow(blog) {  
     const row = document.createElement("a");
     row.href = blog.url;
     row.target = "_blank";
@@ -66,17 +96,9 @@ function createBlogRow(blog) {
         .catch(() => console.error("Failed to send click event"));
     });
 
-    row.appendChild(isReadEle);
-    row.appendChild(time);
-    row.appendChild(title);
-    row.appendChild(blogName);
-
-    if (isRead) {
-        setRowRead(row);
-    }
-
     return row;
 }
+
 
 function listChronologically(blogData) {
     const contentElement = document.getElementById("content");
@@ -84,7 +106,15 @@ function listChronologically(blogData) {
 
     const rows = blogData.flatMap(x => x.map(y => y))
         .sort(byDateDescending)
-        .map(createBlogRow);
+        .map(blog => 
+            pipe(
+                createBlogRow(blog),
+                r => addIsRead(r, blog),
+                r => addTime(r, blog),
+                r => addTitle(r, blog),
+                r => addBlogName(r, blog)
+            )
+        );
     
     rows.forEach(row => contentElement.appendChild(row));
 }
@@ -97,7 +127,14 @@ function createBloggerSection(dataForBlogger) {
     const blogsGrid = document.createElement("div")
 
     dataForBlogger
-        .map(createBlogRow)
+        .map(blog => 
+            pipe(
+                createBlogRow(blog),
+                r => addIsRead(r, blog),
+                r => addTime(r, blog),
+                r => addTitle(r, blog),
+            )
+        )
         .forEach(x => blogsGrid.appendChild(x));
 
     bloggerSection.appendChild(heading);
