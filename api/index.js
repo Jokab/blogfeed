@@ -152,9 +152,9 @@ app.post('/blogs', async (_, res) => {
   try {
     const blogData = await getBlogData();
 
-    //const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
-    //const clickedBlogIds = await getClickedBlogIds(allBlogIds);
-    //await setClickedIfCached(blogData, clickedBlogIds);
+    const allBlogIds = blogData.flatMap(x => x.map(y => y.id));
+    const clickedBlogIds = await getClickedBlogIds(allBlogIds);
+    await setClickedIfCached(blogData, clickedBlogIds);
 
     return res.send(blogData)
   } catch (error) {
