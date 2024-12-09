@@ -10,7 +10,8 @@ const kv = require('@vercel/kv');
 const elleBlogs = [
   {name: "Sandra Beijer", url: "https://sandrabeijer.elle.se"},
   {name: "Flora Wiström", url: "https://flora.elle.se"},
-  {name: "Elsa Billgren", url: "https://elsa.elle.se"}
+  {name: "Elsa Billgren", url: "https://elsa.elle.se"},
+  {name: "Anja Olaug", url: "https://anjaolaug.elle.se"}
 ]
 
 const bffEllen = {
