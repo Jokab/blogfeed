@@ -1,5 +1,5 @@
 async function post() {
-    const blogs = await fetch("/blogs", {
+    const blogs = await fetch("/api/blogs", {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "*",
@@ -82,7 +82,7 @@ function createBlogRow(blog) {
     row.classList.add("row")
     row.setAttribute("data-id", "row")
     row.addEventListener("click", (e) => {
-        fetch("/clickBlog", {
+        fetch("/api/clickBlog", {
             method: "POST", 
             body: JSON.stringify({ blogId: blog.id }), 
             headers: { "Content-Type": "application/json" }})

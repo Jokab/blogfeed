@@ -1,17 +1,22 @@
 {
   "name": "blogfeed",
   "dependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
     "@vercel/kv": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsdom": "^24.0.0",
     "nodemon": "^3.1.0",
     "rss-parser": "^3.13.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
     "vercel": "^34.1.3"
   },
   "scripts": {
-    "build": "echo 'No build step'",
-    "start": "node api/index.js --port $PORT",
-    "dev": "nodemon api/index.js --port $PORT"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec ts-node api/index.ts",
+    "ts-dev": "ts-node api/index.ts"
   }
 }

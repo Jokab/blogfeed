@@ -1,8 +1,27 @@
 {
-    "version": 2,
-    "rewrites": [
-      {
-        "source": "/(.*)",
-        "destination": "/api/index.js"
-      }]
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    }
+  ]
+}
