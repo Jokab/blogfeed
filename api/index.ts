@@ -113,13 +113,28 @@ function getElle(): Promise<BlogPost[]>[] {
   });
 }
 
+async function getAntiPepp(): Promise<BlogPost[]> {
+  const res = await parser.parseURL("https://www.antipepp.nu/feed/");
+  const sorted = res.items.sort((a: any, b: any) => b !== undefined ? new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime() : 0);
+  return sorted.slice(0,3).map((blogPost: any) => {
+    return {
+      name: "Antipepp", 
+      lastUpdateDate: new Date(blogPost.pubDate), 
+      url: blogPost.link, 
+      title: blogPost.title,
+      id: blogPost.title.replaceAll(" ", "-")
+    };
+  });
+}
+
 async function getBlogData(): Promise<BlogPost[]> {
   const requests = [
     ...getElle(), 
     getEllen(),
     getJulia(),
     getSardellen(),
-    getSar_As()
+    getSar_As(),
+    getAntiPepp()
   ];
   return (await Promise.all(requests)).flatMap(x => x);
 }
@@ -199,7 +214,7 @@ app.post('/clickBlog', (req: Request, res: Response) => {
   return app._router.handle(req, res, '/api/clickBlog');
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Running on port ${port}.`);
 });
